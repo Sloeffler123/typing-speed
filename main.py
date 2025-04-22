@@ -1,19 +1,18 @@
 import tkinter
 import random
-TIMER = 60
+import sys
+TIMER = 30
 
 def stop_watch():
     global TIMER
-    if TIMER <= 0:
-        print('stop')
     TIMER -= 1
     time_text.config(text=f'Time left: {TIMER}')
     window.after(1000, stop_watch)
-def words_per_minute(user_text):
-    total = len(user_text) // 5
-    wpm_text.config(text=f'WPM: {total}')
-    window.after(1000, words_per_minute) 
+def words_per_minute(red_chars):
 
+    total = len(user_type.get()) // 5 - len(red_chars)
+    wpm_text.config(text=f'WPM: {total}')
+    
 def generate_words():
     with open('text.txt', 'r') as file:
         words = file.read().splitlines()
@@ -61,6 +60,7 @@ def compare():
     text_diplay.tag_remove(tagName='highlight_red', index1='1.0', index2=tkinter.END)
     text_diplay.tag_remove(tagName='highlight_green', index1='1.0', index2=tkinter.END)
     text_diplay.tag_remove(tagName='highlight_black', index1='1.0', index2=tkinter.END)
+    red_char = []
     for i in range(len(user_text)):
         if text_diplay_lst[i] == '\n':
             line += 1
@@ -69,13 +69,19 @@ def compare():
             text_diplay.tag_add('highlight_green', f'{line}.{char}', f'{line}.{char + 1}')
         elif text_diplay_lst[i] != user_text[i]:  
             text_diplay.tag_add('highlight_red', f'{line}.{char}', f'{line}.{char + 1}') 
-            print(text_diplay_lst[i])
-        char += 1    
+            red_char.append('i')
+        char += 1  
+    print(len(red_char))      
     text_diplay.tag_add('highlight_black', f'{line}.{len(user_text) + 1}', tkinter.END)
-    window.after(100, compare)         
+    words_per_minute(red_char)  
+    window.after(100, compare)   
+        
 # # maybe use yield so progress starts back where it ended
 # text_diplay.tag_add('highlight_black', f'{line}.{len(user_text)}', tkinter.END)
-compare()
-stop_watch()
-words_per_minute(user_type.get())
-window.mainloop()
+
+def main():
+    compare()
+    stop_watch()
+    window.mainloop()
+
+main()
