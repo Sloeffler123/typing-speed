@@ -1,18 +1,23 @@
 import tkinter
+import random
 TIMER = 60
 
 def stop_watch():
     global TIMER
+    if TIMER <= 0:
+        print('stop')
     TIMER -= 1
     time_text.config(text=f'Time left: {TIMER}')
     window.after(1000, stop_watch)
-def words_per_minute():
-    pass
+def words_per_minute(user_text):
+    total = len(user_text) // 5
+    wpm_text.config(text=f'WPM: {total}')
+    window.after(1000, words_per_minute) 
 
 def generate_words():
     with open('text.txt', 'r') as file:
-        words = file.read()
-        return words
+        words = file.read().splitlines()
+        return random.choice(words)
 
 # def clear_text(event):
 #     if user_type.get() == 'Type text here':
@@ -45,24 +50,32 @@ user_type.grid(column=1,row=2)
 
 def compare():
     user_text = user_type.get()
-    text_diplay_lst = text_diplay.get('1.0', tkinter.END).lstrip('\n')
-    # print(user_text)
+    text_diplay_lst = text_diplay.get('1.0', tkinter.END)
     line = 1
     char = 0
+
+    text_diplay.tag_config(tagName='highlight_red', foreground='red')
+    text_diplay.tag_config(tagName='highlight_green', foreground='green')
+    text_diplay.tag_config(tagName='highlight_black', foreground='black')
+
+    text_diplay.tag_remove(tagName='highlight_red', index1='1.0', index2=tkinter.END)
+    text_diplay.tag_remove(tagName='highlight_green', index1='1.0', index2=tkinter.END)
+    text_diplay.tag_remove(tagName='highlight_black', index1='1.0', index2=tkinter.END)
     for i in range(len(user_text)):
         if text_diplay_lst[i] == '\n':
             line += 1
-            char += 1
+            char = 0
         if text_diplay_lst[i] == user_text[i]:
             text_diplay.tag_add('highlight_green', f'{line}.{char}', f'{line}.{char + 1}')
-            text_diplay.tag_config(tagName='highlight_green', foreground='green')
-        elif text_diplay_lst[i] != user_text[i]:
-            text_diplay.tag_add('highlight_red', f'{line}.{char}', f'{line}.{char + 1}')   
-            text_diplay.tag_config(tagName='highlight_red', foreground='red') 
+        elif text_diplay_lst[i] != user_text[i]:  
+            text_diplay.tag_add('highlight_red', f'{line}.{char}', f'{line}.{char + 1}') 
+            print(text_diplay_lst[i])
         char += 1    
-    window.after(1000, compare)        
+    text_diplay.tag_add('highlight_black', f'{line}.{len(user_text) + 1}', tkinter.END)
+    window.after(100, compare)         
 # # maybe use yield so progress starts back where it ended
-
+# text_diplay.tag_add('highlight_black', f'{line}.{len(user_text)}', tkinter.END)
 compare()
 stop_watch()
+words_per_minute(user_type.get())
 window.mainloop()
